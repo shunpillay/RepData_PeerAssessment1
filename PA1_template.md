@@ -1,23 +1,18 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data.
 
-```{r echo=TRUE}
 
+```r
 theData <- read.csv("activity.csv", header=TRUE, na.strings="NA")
 theData[,2] <- as.Date(theData[,2])
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r echo=TRUE}
 
+```r
 listOfDates <- unique(theData[,2])
 stepData <- c()
 
@@ -30,17 +25,20 @@ for(i in listOfDates){
 hist(stepData, main = "Histogram of daily step totals",  xlab = "Number of steps per day")
 ```
 
-```{r echo=TRUE}
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+
+```r
 theMean <- mean(stepData)
 theMedian <- median(stepData)
 ```
 
-The mean is `r theMean` and the median is `r theMedian`.
+The mean is 9354.2295082 and the median is 10395.
 
 ## What is the average daily activity pattern?
 
-```{r echo=TRUE}
 
+```r
 intervalData <- data.frame(interval = numeric(0), average = numeric(0))
 theIntervals <- unique(theData[,3])
 for(i in theIntervals){
@@ -51,29 +49,52 @@ for(i in theIntervals){
 plot(intervalData$X0, intervalData$X1, type="l", xlab="Interval", ylab="Average Number of Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
-```{r echo=TRUE}
+
+
+```r
 theMax <- intervalData$X0[which.max(intervalData$X1)]
 ```
 
-Interval `r theMax`, on average across all the days in the dataset, contains the maximum number of steps.
+Interval 835, on average across all the days in the dataset, contains the maximum number of steps.
 
-The average daily pattern has an abrupt increase in activity around interval 500, peaking around interval `r theMax`, and then tapering off from around interval 1800 onwards.
+The average daily pattern has an abrupt increase in activity around interval 500, peaking around interval 835, and then tapering off from around interval 1800 onwards.
 
 ## Inputing missing values
 
-```{r echo=TRUE}
+
+```r
 sum(is.na(theData$steps))
+```
+
+```
+## [1] 2304
+```
+
+```r
 sum(is.na(theData$date))
+```
+
+```
+## [1] 0
+```
+
+```r
 sum(is.na(theData$interval))
 ```
 
-From the calculations above we see that only the step column has missing values. There are `r sum(is.na(theData$steps))` observations with such missing values.
+```
+## [1] 0
+```
+
+From the calculations above we see that only the step column has missing values. There are 2304 observations with such missing values.
 
 
 The strategy we will use for filling in missing values is to use the mean over an interval.
 
-```{r echo=TRUE}
+
+```r
 theModifiedData <- theData
 for(i in seq(length(theModifiedData$steps))){
         if(is.na(theModifiedData[i,][1])){
@@ -85,7 +106,8 @@ for(i in seq(length(theModifiedData$steps))){
 }
 ```
 
-```{r echo=TRUE}
+
+```r
 modifiedStepData <- c()
 for(i in listOfDates){
         dataForTheDay <- subset(theModifiedData, date==i)
@@ -96,19 +118,22 @@ for(i in listOfDates){
 hist(modifiedStepData, main = "Histogram of daily step totals",  xlab = "Number of steps per day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
-```{r echo=TRUE}
+
+
+```r
 modifiedMean <- mean(modifiedStepData)
 modifiedMedian <- median(modifiedStepData)
 ```
 
-With missing values filled in, the mean becomes `r modifiedMean` and the median becomes `r modifiedMedian`. These values differ from the estimates from the first part of the assignment. Inputing missing data results in a more realistic histogram for intervals corresponding to the early morning, where we do not anticipate many steps.
+With missing values filled in, the mean becomes 1.0766189\times 10^{4} and the median becomes 1.0766189\times 10^{4}. These values differ from the estimates from the first part of the assignment. Inputing missing data results in a more realistic histogram for intervals corresponding to the early morning, where we do not anticipate many steps.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r echo=TRUE}
 
+```r
 library(lattice)
 
 theModifiedData$date <- weekdays(theModifiedData$date)
@@ -142,5 +167,7 @@ allIntervalData <- rbind(weekdayIntervalData, weekendIntervalData)
 
 xyplot(mean~interval | day, data=allIntervalData, xlab="Interval", ylab="Number of steps",layout=c(2,1),typ="l")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
 
 There are differences in activity patterns between weekdays and weekends. During weekdays there is greater activity between intervals 500 and 1000. During weekdays activity starts abruptly around interval 500, in contrast to weekends where activity ramps up slowly. On weekends activity lasts longer into the evening.
